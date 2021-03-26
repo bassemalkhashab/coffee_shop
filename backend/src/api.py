@@ -124,7 +124,22 @@ def post_drink():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks/<int:ID>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def edit_drink(ID):
+    id = request.get_json('id')
+    recipe = request.get_json()['recipe']
+    recipeJson =  json.dumps(recipe) 
+    title = request.get_json()['title']
+    drink = Drink.query.filter_by(id=ID).first()    
+    drink.id= ID
+    drink.recipe=recipeJson
+    drink.title = title
+    drink.update()
+    return jsonify({
+        "success" : True,
+        "drinks": drink.long()
+    })
 
 '''
 @TODO implement endpoint
@@ -136,7 +151,16 @@ def post_drink():
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks/<int:ID>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(ID):
+   
+    drink = Drink.query.filter_by(id=ID).first()
+    drink.delete()
+    return jsonify({
+        "success" : True,
+        "delete": ID
+    })
 
 ## Error Handling
 '''

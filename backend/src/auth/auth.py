@@ -90,11 +90,9 @@ def verify_decode_jwt(token):
     if len(tokenParts) !=3:
         raise Exception('Authorization Error')
     Header = json.loads(base64.b64decode(tokenParts[0]))
-    print("Header: ", Header)
     if "kid" not in Header:
         raise Exception('Authorization Error')
     kid = requests.get('https://coffeeshopprojectudacity.us.auth0.com/.well-known/jwks.json?_ga=2.19285688.1448347622.1616603528-1677198890.1615769745').json()['keys'][0]['kid']
-    print("kid: ", kid)
     if Header["kid"] != kid:
         raise Exception('Authorization Error')
     payloadEncoded = str(tokenParts[1])
@@ -102,7 +100,6 @@ def verify_decode_jwt(token):
         i = 3- (len(payloadEncoded) % 3)
         for x in range(i):
             payloadEncoded = payloadEncoded + '='
-    print("payloadEncoded: ",payloadEncoded)
     payload = json.loads(base64.b64decode(payloadEncoded))
     
     return payload
