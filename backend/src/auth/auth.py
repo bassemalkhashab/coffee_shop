@@ -34,15 +34,15 @@ class AuthError(Exception):
 '''
 def get_token_auth_header():
     if 'Authorization' not in request.headers:
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     
     jwt = request.headers.get('Authorization')
     jwtParts = jwt.split(" ")
 
     if len(jwtParts) != 2:
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     elif jwtParts[0].lower() != 'bearer':
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
 
     token = jwtParts[1]
     return token
@@ -61,13 +61,13 @@ def get_token_auth_header():
 def check_permissions(permission, payload):
     # raise Exception('Not Implemented')
     if permission =='':
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     error = True
     for Permission in payload['permissions']:
         if Permission == permission:
             error =False
     if error ==True :
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     return True
 
 '''
@@ -88,13 +88,13 @@ def verify_decode_jwt(token):
 
     tokenParts = token.split(".")
     if len(tokenParts) !=3:
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     Header = json.loads(base64.b64decode(tokenParts[0]))
     if "kid" not in Header:
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     kid = requests.get('https://coffeeshopprojectudacity.us.auth0.com/.well-known/jwks.json?_ga=2.19285688.1448347622.1616603528-1677198890.1615769745').json()['keys'][0]['kid']
     if Header["kid"] != kid:
-        raise Exception('Authorization Error')
+        raise Exception('Authorization Error' ,403)
     payloadEncoded = str(tokenParts[1])
     if len(payloadEncoded) != 0:
         i = 3- (len(payloadEncoded) % 3)
