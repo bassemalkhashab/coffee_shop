@@ -16,7 +16,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 
@@ -99,7 +99,7 @@ def get_drinks_detail():
 @requires_auth('post:drinks')
 def post_drink():
     try:
-        id = request.get_json()['id']
+        
         recipe = request.get_json()['recipe']
         recipeJson =  json.dumps(recipe) 
         title = request.get_json()['title']
@@ -133,18 +133,24 @@ def post_drink():
 @requires_auth('patch:drinks')
 def edit_drink(ID):
     try:
-        id = request.get_json('id')
-        recipe = request.get_json()['recipe']
-        recipeJson =  json.dumps(recipe) 
-        title = request.get_json()['title']
         drink = Drink.query.filter_by(id=ID).first()    
-        drink.id= ID
-        drink.recipe=recipeJson
-        drink.title = title
+        
+        if 'id' in request.json:
+            id = request.get_json('id')
+            drink.id= ID
+        if 'recipe' in request.json:
+            recipe = request.get_json()['recipe']
+            recipeJson =  json.dumps(recipe) 
+            drink.recipe=recipeJson
+        if 'title' in request.json:
+            title = request.get_json()['title']
+            drink.title = title      
         drink.update()
+        drinkList = Drink.query.all()
+        drink = [ drinks.long() for drinks in drinkList]
         return jsonify({
             "success" : True,
-            "drinks": drink.long()
+            "drinks": drink
         })
     except:
         abort(422)
@@ -214,10 +220,8 @@ def not_found(error):
     error handler should conform to general task above 
 '''
 
-@app.errorhandler(401)
-def unauthorized(error):
-    return jsonify({
-                    "success": False, 
-                    "error": 401,
-                    "message": "Unauthorized"
-                    }), 401
+@app.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response

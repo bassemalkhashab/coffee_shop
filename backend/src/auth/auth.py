@@ -11,9 +11,9 @@ AUTH0_DOMAIN = 'coffeeshopprojectudacity.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'coffeeshop'
 
-## AuthError Exception
+## AuthError AuthError
 '''
-AuthError Exception
+AuthError AuthError
 A standardized way to communicate auth failure modes
 '''
 class AuthError(Exception):
@@ -34,15 +34,15 @@ class AuthError(Exception):
 '''
 def get_token_auth_header():
     if 'Authorization' not in request.headers:
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     
     jwt = request.headers.get('Authorization')
     jwtParts = jwt.split(" ")
 
     if len(jwtParts) != 2:
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     elif jwtParts[0].lower() != 'bearer':
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
 
     token = jwtParts[1]
     return token
@@ -59,15 +59,15 @@ def get_token_auth_header():
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    # raise Exception('Not Implemented')
+    # raise AuthError('Not Implemented')
     if permission =='':
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     error = True
     for Permission in payload['permissions']:
         if Permission == permission:
             error =False
     if error ==True :
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     return True
 
 '''
@@ -84,17 +84,17 @@ def check_permissions(permission, payload):
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 def verify_decode_jwt(token):
-    # raise Exception('Not Implemented')
+    # raise AuthError('Not Implemented')
 
     tokenParts = token.split(".")
     if len(tokenParts) !=3:
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     Header = json.loads(base64.b64decode(tokenParts[0]))
     if "kid" not in Header:
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     kid = requests.get('https://coffeeshopprojectudacity.us.auth0.com/.well-known/jwks.json?_ga=2.19285688.1448347622.1616603528-1677198890.1615769745').json()['keys'][0]['kid']
     if Header["kid"] != kid:
-        raise Exception('Authorization Error' ,403)
+        raise AuthError({"code": "authorization_header_missing","description":"Authorization header is expected"}, 401)
     payloadEncoded = str(tokenParts[1])
     if len(payloadEncoded) != 0:
         i = 3- (len(payloadEncoded) % 3)
